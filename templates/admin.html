@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <style type="text/theme">
+        @theme {
+            --font-jost: "Jost", sans-serif;
+        }
+    </style>
+
+    <style>
+        .admin-gradient {
+            background: linear-gradient(135deg, #1a0b14 0%, #0d060a 100%);
+        }
+        .table-pink {
+            background: rgba(30, 20, 25, 0.6);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
+        .btn-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-pink:hover {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+        }
+    </style>
+
+    <title>Админ панель - Кыргызстандын Кыздар Кыймылы</title>
+</head>
+<body class="admin-gradient font-jost min-h-screen">
+    <header class="border-b border-pink-500/20 bg-black/30 backdrop-blur-sm sticky top-0 z-40">
+        <nav class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+            <a href="/" class="text-pink-300 hover:text-pink-400 text-xl font-bold">
+                <i class="fas fa-arrow-left"></i> На главную
+            </a>
+            <div class="flex items-center gap-4">
+                <span class="text-pink-300">
+                    <i class="fas fa-crown text-yellow-400"></i> {{ user.name }}
+                </span>
+                <a href="/logout" class="bg-pink-600/20 text-pink-400 border border-pink-500/30 px-4 py-2 rounded-xl text-sm hover:bg-pink-600/30 transition">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600 mb-8 text-center">
+            <i class="fas fa-shield-alt mr-2"></i>Админ панель
+        </h1>
+        
+        <div class="table-pink rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-pink-200">
+                    <thead class="bg-pink-600/20 border-b border-pink-500/30">
+                        <tr>
+                            <th class="px-6 py-4 text-left">ID</th>
+                            <th class="px-6 py-4 text-left">Имя</th>
+                            <th class="px-6 py-4 text-left">Email</th>
+                            <th class="px-6 py-4 text-left">Статус</th>
+                            <th class="px-6 py-4 text-left">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr class="border-b border-pink-500/10 hover:bg-pink-600/10 transition">
+                            <td class="px-6 py-4">{{ u.id }}</td>
+                            <td class="px-6 py-4">{{ u.name }}</td>
+                            <td class="px-6 py-4">{{ u.email }}</td>
+                            <td class="px-6 py-4">
+                                {% if u.is_admin %}
+                                <span class="bg-purple-600/30 text-purple-300 px-3 py-1 rounded-full text-sm">
+                                    <i class="fas fa-crown"></i> Админ
+                                </span>
+                                {% else %}
+                                <span class="bg-pink-600/20 text-pink-300 px-3 py-1 rounded-full text-sm">
+                                    Пользователь
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 space-x-2">
+                                {% if not u.is_admin %}
+                                <a href="/admin/make_admin/{{ u.id }}" class="text-green-400 hover:text-green-300 transition" onclick="return confirm('Сделать администратором?')">
+                                    <i class="fas fa-user-shield"></i> Дать права
+                                </a>
+                                {% elif u.id != user.id %}
+                                <a href="/admin/remove_admin/{{ u.id }}" class="text-yellow-400 hover:text-yellow-300 transition" onclick="return confirm('Лишить прав администратора?')">
+                                    <i class="fas fa-user-minus"></i> Лишить прав
+                                </a>
+                                {% endif %}
+                                
+                                {% if u.id != user.id %}
+                                <a href="/admin/delete_user/{{ u.id }}" class="text-red-400 hover:text-red-300 transition ml-3" onclick="return confirm('Удалить пользователя?')">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center text-pink-300/50 text-sm">
+            <i class="fas fa-info-circle"></i> Всего пользователей: {{ users|length }}
+        </div>
+    </main>
+</body>
+</html>

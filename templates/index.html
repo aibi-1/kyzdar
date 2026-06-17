@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Подключение шрифтов из Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <!-- Настройка Tailwind CSS v4 для использования нового шрифта -->
+    <style type="text/theme">
+        @theme {
+            --font-jost: "Jost", sans-serif;
+        }
+    </style>
+
+    <style>
+        /* Розовая тематика для модальных окон */
+        .modal-pink {
+            background: linear-gradient(135deg, #1a0b14 0%, #2d1522 100%);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.2);
+        }
+        
+        .btn-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pink:hover {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .input-pink {
+            background: rgba(30, 20, 25, 0.9);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .input-pink:focus {
+            border-color: #ec4899;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+            outline: none;
+        }
+        
+        /* Анимация для модального окна */
+        .modal-animate {
+            animation: fadeInScale 0.3s ease-out;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .message {
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <title>Кыргызстандын Кыздар Кыймылы</title>
+</head>
+
+<body class="bg-gradient-to-br from-[#1a0b14] to-[#0d060a] font-jost min-h-screen">
+    <!-- Сообщения Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
+                {% for category, message in messages %}
+                    <div class="message px-6 py-3 rounded-xl text-white {% if category == 'success' %}bg-pink-600/90{% else %}bg-red-600/90{% endif %} backdrop-blur-sm shadow-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <header class="border-b border-pink-500/20 bg-black/30 backdrop-blur-sm sticky top-0 z-40">
+        <nav class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+            <div class="flex gap-6">
+                <a class="text-pink-200 hover:text-pink-400 hover:scale-110 transition duration-300 text-[19px]" href="#">О нас</a>       
+                <a class="text-pink-200 hover:text-pink-400 hover:scale-110 transition duration-300 text-[19px]" href="#">Новости</a>
+                <a class="text-pink-200 hover:text-pink-400 hover:scale-110 transition duration-300 text-[19px]" href="#">События</a>
+                <a class="text-pink-200 hover:text-pink-400 hover:scale-110 transition duration-300 text-[19px]" href="#">Проекты</a>
+                <a class="text-pink-200 hover:text-pink-400 hover:scale-110 transition duration-300 text-[19px]" href="#">Контакты</a>
+                {% if user and user.is_admin %}
+                <a href="/admin" class="text-purple-300 hover:text-purple-400 hover:scale-110 transition duration-300 text-[19px]">
+                    <i class="fas fa-crown"></i> Админ панель
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Контейнер авторизации -->
+            <div id="authContainer">
+                {% if user %}
+                <div class="flex items-center gap-3">
+                    <span class="text-pink-300 text-sm">
+                        <i class="fas fa-user-circle"></i> {{ user.name }}
+                        {% if user.is_admin %}
+                        <span class="ml-1 text-xs bg-purple-600/50 px-2 py-0.5 rounded-full">Admin</span>
+                        {% endif %}
+                    </span>
+                    <a href="/logout" class="bg-pink-600/20 text-pink-400 border border-pink-500/30 px-4 py-2 rounded-xl text-sm hover:bg-pink-600/30 transition">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                </div>
+                {% else %}
+                <button id="loginBtn" class="btn-pink px-5 py-2 rounded-xl transition text-white flex items-center gap-2 shadow-lg">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <div class="text-center py-20">
+            <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600 mb-4">
+                Кыргызстандын Кыздар Кыймылы
+            </h1>
+            <p class="text-pink-200/70 text-lg">Добро пожаловать в наше сообщество</p>
+        </div>
+    </main>
+
+    <!-- Модальное окно входа -->
+    <div id="loginModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center hidden z-50">
+        <div class="modal-pink p-8 rounded-[24px] w-[380px] relative modal-animate">
+            <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-pink-400 transition text-xl">✕</button>
+            <h2 class="text-white text-2xl font-bold mb-6 text-center">
+                <i class="fas fa-heart text-pink-500 mr-2"></i>Добро пожаловать
+            </h2>
+            
+            <!-- Табы для переключения между входом и регистрацией -->
+            <div class="flex gap-2 mb-6 bg-black/30 rounded-xl p-1">
+                <button id="loginTab" class="flex-1 py-2 rounded-lg transition text-pink-200 bg-pink-600/30">Вход</button>
+                <button id="registerTab" class="flex-1 py-2 rounded-lg transition text-pink-200 hover:bg-pink-600/20">Регистрация</button>
+            </div>
+            
+            <!-- Форма входа -->
+            <form id="loginForm" action="/login" method="POST" class="flex flex-col gap-4">
+                <input type="email" name="email" placeholder="Email" required class="input-pink p-3 rounded-[12px] text-white placeholder-gray-400">
+                <input type="password" name="password" placeholder="Пароль" required class="input-pink p-3 rounded-[12px] text-white placeholder-gray-400">
+                <button type="submit" class="btn-pink text-white py-3 rounded-[12px] font-bold transition shadow-lg">
+                    <i class="fas fa-arrow-right-to-bracket"></i> Войти
+                </button>
+            </form>
+            
+            <!-- Форма регистрации (скрыта по умолчанию) -->
+            <form id="registerForm" action="/register" method="POST" class="flex flex-col gap-4 hidden">
+                <input type="text" name="name" placeholder="Ваше имя" required class="input-pink p-3 rounded-[12px] text-white placeholder-gray-400">
+                <input type="email" name="email" placeholder="Email" required class="input-pink p-3 rounded-[12px] text-white placeholder-gray-400">
+                <input type="password" name="password" placeholder="Пароль" required class="input-pink p-3 rounded-[12px] text-white placeholder-gray-400">
+                <button type="submit" class="btn-pink text-white py-3 rounded-[12px] font-bold transition shadow-lg">
+                    <i class="fas fa-user-plus"></i> Зарегистрироваться
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Модальное окно логина
+        const loginModal = document.getElementById('loginModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const closeModal = document.getElementById('closeModal');
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        if (loginBtn) {
+            loginBtn.onclick = () => {
+                loginModal.classList.remove('hidden');
+            }
+        }
+
+        closeModal.onclick = () => {
+            loginModal.classList.add('hidden');
+        }
+
+        // Закрытие по клику вне модального окна
+        loginModal.onclick = (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.add('hidden');
+            }
+        }
+
+        // Переключение между табами
+        loginTab.onclick = () => {
+            loginTab.classList.add('bg-pink-600/30');
+            registerTab.classList.remove('bg-pink-600/30');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        }
+
+        registerTab.onclick = () => {
+            registerTab.classList.add('bg-pink-600/30');
+            loginTab.classList.remove('bg-pink-600/30');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        }
+
+        // Автоматическое скрытие сообщений через 3 секунды
+        setTimeout(() => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transition = 'opacity 0.5s';
+                setTimeout(() => msg.remove(), 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
